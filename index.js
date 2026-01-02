@@ -68,20 +68,26 @@ const App = () => {
 
   const results = useMemo(() => {
     const levelBase = calculateLevelBonus(level);
-    const totalSkill = magicLevel + levelBase;
 
-    // THE PUZZLE PIECE: Base Power / 25 = Average Multiplier
-    const avgMult = basePower / 25;
+    // Formula: (BasePower/25 × ML) + (BasePower/4) + LevelBonus
+    const mlMultiplier = basePower / 25;
+    const spellBase = basePower / 4;
 
-    // Spread for ranges (approx. +/- 30% from average is standard for mages)
-    const minMult = avgMult * 0.7;
-    const maxMult = avgMult * 1.3;
+    // Spread for ranges (approx. +/- 30% from average)
+    const minMult = mlMultiplier * 0.7;
+    const maxMult = mlMultiplier * 1.3;
 
-    let avg = totalSkill * avgMult;
-    let min = totalSkill * minMult;
-    let max = totalSkill * maxMult;
+    // ML scaling component
+    let avgMlDamage = magicLevel * mlMultiplier;
+    let minMlDamage = magicLevel * minMult;
+    let maxMlDamage = magicLevel * maxMult;
 
-    // Apply Equipment Bonus
+    // Final: (ML scaling) + (spell flat base) + (level bonus)
+    let avg = avgMlDamage + spellBase + levelBase;
+    let min = minMlDamage + spellBase + levelBase;
+    let max = maxMlDamage + spellBase + levelBase;
+
+    // Apply Equipment Bonus (scales the whole hit)
     if (equipBonus !== 0) {
       const factor = (1 + equipBonus / 100);
       avg *= factor;
@@ -99,8 +105,8 @@ const App = () => {
 
     return {
       levelBase,
-      totalSkill,
-      avgMult: avgMult.toFixed(2),
+      avgMult: mlMultiplier.toFixed(2),
+      spellBase: Math.floor(spellBase),
       avg: Math.floor(avg),
       min: Math.floor(min),
       max: Math.floor(max),
@@ -145,8 +151,8 @@ const App = () => {
                   key: mode.id,
                   onClick: () => setCalcMode(mode.id),
                   className: `p-4 rounded-xl border text-center transition-all ${calcMode === mode.id
-                      ? "bg-amber-500/10 border-amber-500 text-amber-500"
-                      : "bg-[#0c0e12] border-slate-800 text-slate-500 hover:border-slate-600"
+                    ? "bg-amber-500/10 border-amber-500 text-amber-500"
+                    : "bg-[#0c0e12] border-slate-800 text-slate-500 hover:border-slate-600"
                     }`
                 },
                   React.createElement(mode.icon, { className: "w-6 h-6 mx-auto mb-2" }),
@@ -258,7 +264,7 @@ const App = () => {
                   React.createElement('div', null,
                     React.createElement('h2', { className: "text-2xl font-black text-white tracking-tight leading-none uppercase" }, `Base Power ${basePower}`),
                     React.createElement('p', { className: "text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] mt-2" },
-                      `ML ${magicLevel} + DM/HE ${results.levelBase} = ${results.totalSkill} TOTAL SKILL`
+                      `(${magicLevel}×${results.avgMult}) + ${results.spellBase} base + ${results.levelBase} lvl`
                     )
                   )
                 ),
