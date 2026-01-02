@@ -33,11 +33,11 @@ const CALC_MODES = [
 
 const App = () => {
   // Character stats
-  const [level, setLevel] = useState(250);
-  const [magicLevel, setMagicLevel] = useState(95);
+  const [level, setLevel] = useState(500);
+  const [magicLevel, setMagicLevel] = useState(120);
 
   // Spell parameters
-  const [basePower, setBasePower] = useState(140); // From in-game Spell Archive
+  const [basePower, setBasePower] = useState(225); // From in-game Spell Archive
   const [calcMode, setCalcMode] = useState('magic');
 
   // Modifiers
