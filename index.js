@@ -16,7 +16,8 @@ import {
  * Tibia Damage Calculator
  * 
  * Formula derived from in-game "Base Power" values (from Spell Archive):
- * - Magic/Healing: Uses Base Power to derive multipliers
+ * - Magic/Healing: Average Multiplier = Base Power / 25
+ * - Formula: (Magic Level + Level Bonus) * (Base Power / 25)
  * 
  * Includes high-level diminishing returns scaling for level bonus:
  * - 1-500: +1 per 5 levels
@@ -45,11 +46,7 @@ const App = () => {
 
   /**
    * Calculates the level damage/healing bonus with diminishing returns
-   * Logic:
-   * 1-500: +1 per 5 levels (Max +100)
-   * 501-1100: +1 per 6 levels (Max +100)
-   * 1101-1800: +1 per 7 levels (Max +100)
-   * etc...
+   * (Standard Tibia Skills Window "Damage/Healing" field)
    */
   const calculateLevelBonus = (lvl) => {
     let bonus = 0;
@@ -71,44 +68,42 @@ const App = () => {
 
   const results = useMemo(() => {
     const levelBase = calculateLevelBonus(level);
+    const totalSkill = magicLevel + levelBase;
 
-    let min, max, minMult, maxMult, minOffset, maxOffset;
+    // THE PUZZLE PIECE: Base Power / 25 = Average Multiplier
+    const avgMult = basePower / 25;
 
-    const sqrtBP = Math.sqrt(basePower);
-    maxMult = sqrtBP * 0.59;
-    minMult = maxMult * 0.55;
-    maxOffset = Math.floor(basePower * 0.25);
-    minOffset = Math.floor(maxOffset * 0.6);
+    // Spread for ranges (approx. +/- 30% from average is standard for mages)
+    const minMult = avgMult * 0.7;
+    const maxMult = avgMult * 1.3;
 
-    const minStatComponent = Math.floor(magicLevel * minMult + minOffset);
-    const maxStatComponent = Math.floor(magicLevel * maxMult + maxOffset);
-
-    min = levelBase + minStatComponent;
-    max = levelBase + maxStatComponent;
+    let avg = totalSkill * avgMult;
+    let min = totalSkill * minMult;
+    let max = totalSkill * maxMult;
 
     // Apply Equipment Bonus
     if (equipBonus !== 0) {
-      min = Math.floor(min * (1 + equipBonus / 100));
-      max = Math.floor(max * (1 + equipBonus / 100));
+      const factor = (1 + equipBonus / 100);
+      avg *= factor;
+      min *= factor;
+      max *= factor;
     }
 
     // Apply Creature Resistance/Weakness (only for attack spells)
     if (calcMode === 'magic' && targetResistance !== 100) {
-      min = Math.floor(min * (targetResistance / 100));
-      max = Math.floor(max * (targetResistance / 100));
+      const factor = (targetResistance / 100);
+      avg *= factor;
+      min *= factor;
+      max *= factor;
     }
 
     return {
       levelBase,
-      minStatComponent,
-      maxStatComponent,
-      min,
-      max,
-      avg: Math.floor((min + max) / 2),
-      minMult: minMult.toFixed(3),
-      maxMult: maxMult.toFixed(3),
-      minOffset,
-      maxOffset,
+      totalSkill,
+      avgMult: avgMult.toFixed(2),
+      avg: Math.floor(avg),
+      min: Math.floor(min),
+      max: Math.floor(max),
       scalingStat: magicLevel,
       statLabel: 'ML'
     };
@@ -210,15 +205,21 @@ const App = () => {
               React.createElement('h2', { className: "text-lg font-bold text-white uppercase tracking-tight" }, "Spell Stats")
             ),
 
-            React.createElement('div', null,
-              React.createElement('label', { className: "block text-[10px] font-black text-amber-500 uppercase tracking-widest mb-2" }, "⚡ Base Power (from Cyclopedia)"),
-              React.createElement('input', {
-                type: "number",
-                value: basePower,
-                onChange: (e) => setBasePower(Math.max(1, parseInt(e.target.value) || 0)),
-                className: "w-full bg-[#0c0e12] border border-amber-500/50 rounded-xl px-4 py-3 text-amber-400 font-bold text-xl focus:ring-2 focus:ring-amber-500 outline-none ring-1 ring-amber-500/30"
-              }),
-              React.createElement('div', { className: "mt-2 text-[9px] text-slate-500" }, "Open Cyclopedia → Spell Archive → Select spell → Combat Stats → Base Power")
+            React.createElement('div', { className: "space-y-4" },
+              React.createElement('div', null,
+                React.createElement('label', { className: "block text-[10px] font-black text-amber-500 uppercase tracking-widest mb-2" }, "⚡ Base Power (from Cyclopedia)"),
+                React.createElement('input', {
+                  type: "number",
+                  value: basePower,
+                  onChange: (e) => setBasePower(Math.max(1, parseInt(e.target.value) || 0)),
+                  className: "w-full bg-[#0c0e12] border border-amber-500/50 rounded-xl px-4 py-3 text-amber-400 font-bold text-xl focus:ring-2 focus:ring-amber-500 outline-none ring-1 ring-amber-500/30"
+                }),
+                React.createElement('div', { className: "mt-2 text-[9px] text-slate-500" }, "Open Cyclopedia → Spell Archive → Select spell → Combat Stats → Base Power")
+              ),
+              React.createElement('div', { className: "bg-amber-500/5 border border-amber-500/20 rounded-xl p-4 flex justify-between items-center" },
+                React.createElement('span', { className: "text-[10px] font-black text-slate-400 uppercase tracking-widest" }, "Average Multiplier"),
+                React.createElement('span', { className: "text-sm font-black text-amber-500 font-mono" }, `x${results.avgMult}`)
+              )
             )
           ),
 
@@ -257,12 +258,12 @@ const App = () => {
                   React.createElement('div', null,
                     React.createElement('h2', { className: "text-2xl font-black text-white tracking-tight leading-none uppercase" }, `Base Power ${basePower}`),
                     React.createElement('p', { className: "text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] mt-2" },
-                      `Level ${level} • ML ${results.scalingStat}`
+                      `ML ${magicLevel} + DM/HE ${results.levelBase} = ${results.totalSkill} TOTAL SKILL`
                     )
                   )
                 ),
                 React.createElement('div', { className: "bg-[#0c0e12] px-4 py-2 rounded-xl border border-slate-700 flex items-center gap-2 shadow-inner" },
-                  React.createElement('span', { className: "text-[10px] font-black text-slate-500 uppercase" }, "Avg"),
+                  React.createElement('span', { className: "text-[10px] font-black text-slate-500 uppercase" }, "Avg Hit"),
                   React.createElement('span', { className: "text-xl font-black text-white font-mono" }, results.avg)
                 )
               ),
