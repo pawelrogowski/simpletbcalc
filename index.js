@@ -222,9 +222,12 @@ const App = () => {
                 }),
                 React.createElement('div', { className: "mt-2 text-[9px] text-slate-500" }, "Open Cyclopedia → Spell Archive → Select spell → Combat Stats → Base Power")
               ),
-              React.createElement('div', { className: "bg-amber-500/5 border border-amber-500/20 rounded-xl p-4 flex justify-between items-center" },
-                React.createElement('span', { className: "text-[10px] font-black text-slate-400 uppercase tracking-widest" }, "Average Multiplier"),
-                React.createElement('span', { className: "text-sm font-black text-amber-500 font-mono" }, `x${results.avgMult}`)
+              React.createElement('div', { className: "bg-amber-500/5 border border-amber-500/20 rounded-xl p-4" },
+                React.createElement('div', { className: "flex justify-between items-center" },
+                  React.createElement('span', { className: "text-[10px] font-black text-slate-400 uppercase tracking-widest" }, "Damage per Magic Level"),
+                  React.createElement('span', { className: "text-sm font-black text-amber-500 font-mono" }, `+${results.avgMult}`)
+                ),
+                React.createElement('div', { className: "mt-2 text-[9px] text-slate-500 font-mono" }, `${basePower} / 25 = ${results.avgMult} avg dmg per ML`)
               )
             )
           ),
@@ -308,6 +311,35 @@ const App = () => {
                       React.createElement('div', { className: "absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-0.5 h-6 bg-white shadow-[0_0_10px_white] rounded-full" })
                     )
                   )
+                )
+              ),
+
+              // Formula Breakdown Section
+              React.createElement('div', { className: "mt-8 bg-[#0c0e12] rounded-2xl border border-slate-800 p-6" },
+                React.createElement('h3', { className: "text-[10px] font-black uppercase tracking-widest text-slate-400 mb-4 flex items-center gap-2" },
+                  React.createElement(Calculator, { className: "w-4 h-4" }), " Formula Breakdown"
+                ),
+                React.createElement('div', { className: "space-y-3" },
+                  // Generic formula
+                  React.createElement('div', { className: "text-xs text-slate-500 font-mono" },
+                    "Average = (MagicLevel × SpellPower/25) + (SpellPower/4) + LevelBonus"
+                  ),
+                  // With values
+                  React.createElement('div', { className: "text-sm text-amber-400 font-mono bg-amber-500/5 border border-amber-500/20 rounded-lg px-4 py-3" },
+                    `= (${magicLevel} × ${basePower}/25) + (${basePower}/4) + ${results.levelBase}`
+                  ),
+                  React.createElement('div', { className: "text-sm text-white font-mono" },
+                    `= (${magicLevel} × ${results.avgMult}) + ${results.spellBase} + ${results.levelBase}`
+                  ),
+                  React.createElement('div', { className: "text-lg text-emerald-400 font-black font-mono" },
+                    `= ${Math.floor(magicLevel * parseFloat(results.avgMult))} + ${results.spellBase} + ${results.levelBase} = ${results.avg}`
+                  )
+                ),
+                React.createElement('div', { className: "mt-4 text-[9px] text-slate-600 italic" },
+                  "LevelBonus has diminishing returns: +1 per 5 levels (1-500), +1 per 6 levels (501-1100), etc."
+                ),
+                React.createElement('div', { className: "mt-3 text-[9px] text-rose-400/70 italic border-t border-slate-800 pt-3" },
+                  "⚠ Disclaimer: This formula is based on player observations and community research. It is not an official formula provided by CipSoft."
                 )
               )
             )
