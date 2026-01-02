@@ -1,4 +1,3 @@
-```javascript
 import React, { useState, useMemo } from 'react';
 import { createRoot } from 'react-dom/client';
 import {
@@ -187,11 +186,10 @@ const App = () => {
                 React.createElement('button', {
                   key: mode.id,
                   onClick: () => setCalcMode(mode.id),
-                  className: `p - 3 rounded - xl border text - center transition - all ${
-  calcMode === mode.id
-  ? "bg-amber-500/10 border-amber-500 text-amber-500"
-  : "bg-[#0c0e12] border-slate-800 text-slate-500 hover:border-slate-600"
-} `
+                  className: `p-3 rounded-xl border text-center transition-all ${calcMode === mode.id
+                      ? "bg-amber-500/10 border-amber-500 text-amber-500"
+                      : "bg-[#0c0e12] border-slate-800 text-slate-500 hover:border-slate-600"
+                    }`
                 },
                   React.createElement(mode.icon, { className: "w-5 h-5 mx-auto mb-1" }),
                   React.createElement('div', { className: "text-[10px] font-bold uppercase" }, mode.label)
@@ -217,7 +215,7 @@ const App = () => {
                     onChange: (e) => setLevel(Math.max(1, parseInt(e.target.value) || 0)),
                     className: "w-full bg-[#0c0e12] border border-slate-700 rounded-xl px-4 py-3 text-white font-bold focus:ring-2 focus:ring-amber-500 outline-none transition-all"
                   }),
-                  React.createElement('div', { className: "mt-1 text-[9px] text-slate-600 font-bold uppercase italic" }, `Level Bonus: +${ results.levelBase } `)
+                  React.createElement('div', { className: "mt-1 text-[9px] text-slate-600 font-bold uppercase italic" }, `Level Bonus: +${results.levelBase}`)
                 ),
                 React.createElement('div', null,
                   React.createElement('label', { className: "block text-[10px] font-black text-slate-500 uppercase tracking-widest mb-2" }, "Magic Level"),
@@ -225,7 +223,7 @@ const App = () => {
                     type: "number",
                     value: magicLevel,
                     onChange: (e) => setMagicLevel(Math.max(0, parseInt(e.target.value) || 0)),
-                    className: `w - full bg - [#0c0e12] border border - slate - 700 rounded - xl px - 4 py - 3 text - white font - bold focus: ring - 2 focus: ring - amber - 500 outline - none transition - all ${ calcMode !== 'melee' ? 'ring-1 ring-amber-500/50' : 'opacity-40' } `
+                    className: `w-full bg-[#0c0e12] border border-slate-700 rounded-xl px-4 py-3 text-white font-bold focus:ring-2 focus:ring-amber-500 outline-none transition-all ${calcMode !== 'melee' ? 'ring-1 ring-amber-500/50' : 'opacity-40'}`
                   })
                 )
               ),
@@ -237,7 +235,7 @@ const App = () => {
                     type: "number",
                     value: meleeSkill,
                     onChange: (e) => setMeleeSkill(Math.max(0, parseInt(e.target.value) || 0)),
-                    className: `w - full bg - [#0c0e12] border border - slate - 700 rounded - xl px - 4 py - 3 text - white font - bold focus: ring - 2 focus: ring - amber - 500 outline - none transition - all ${ calcMode === 'melee' ? 'ring-1 ring-amber-500/50' : 'opacity-40' } `
+                    className: `w-full bg-[#0c0e12] border border-slate-700 rounded-xl px-4 py-3 text-white font-bold focus:ring-2 focus:ring-amber-500 outline-none transition-all ${calcMode === 'melee' ? 'ring-1 ring-amber-500/50' : 'opacity-40'}`
                   })
                 ),
                 React.createElement('div', null,
@@ -292,19 +290,19 @@ const App = () => {
         React.createElement('section', { className: "lg:col-span-7 space-y-6" },
           React.createElement('div', { className: "bg-[#161a20] border border-slate-800 rounded-3xl overflow-hidden shadow-2xl flex flex-col h-full ring-1 ring-white/5" },
             React.createElement('div', { className: "p-10 border-b border-slate-800 bg-gradient-to-br from-[#1c2129] to-[#161a20] relative" },
-              React.createElement('div', { className: `absolute top - 0 left - 0 w - full h - 1 bg - gradient - to - r from - transparent ${ calcMode === 'healing' ? 'via-emerald-500' : calcMode === 'melee' ? 'via-slate-400' : 'via-amber-500' } to - transparent` }),
+              React.createElement('div', { className: `absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent ${calcMode === 'healing' ? 'via-emerald-500' : calcMode === 'melee' ? 'via-slate-400' : 'via-amber-500'} to-transparent` }),
 
               React.createElement('div', { className: "flex items-center justify-between mb-10" },
                 React.createElement('div', { className: "flex items-center gap-4" },
-                  React.createElement('div', { className: `p - 3 rounded - 2xl ${ calcMode === 'healing' ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20' : calcMode === 'melee' ? 'bg-slate-500/10 text-slate-400 border border-slate-500/20' : 'bg-rose-500/10 text-rose-500 border border-rose-500/20' } ` },
+                  React.createElement('div', { className: `p-3 rounded-2xl ${calcMode === 'healing' ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20' : calcMode === 'melee' ? 'bg-slate-500/10 text-slate-400 border border-slate-500/20' : 'bg-rose-500/10 text-rose-500 border border-rose-500/20'}` },
                     React.createElement(ModeIcon, { className: "w-8 h-8" })
                   ),
                   React.createElement('div', null,
                     React.createElement('h2', { className: "text-2xl font-black text-white tracking-tight leading-none uppercase" },
-                      calcMode === 'melee' ? `Weapon Atk ${ weaponAttack } ` : `Base Power ${ basePower } `
+                      calcMode === 'melee' ? `Weapon Atk ${weaponAttack}` : `Base Power ${basePower}`
                     ),
                     React.createElement('p', { className: "text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] mt-2" },
-                      `Level ${ level } • ${ results.statLabel } ${ results.scalingStat } `
+                      `Level ${level} • ${results.statLabel} ${results.scalingStat}`
                     )
                   )
                 ),
@@ -333,18 +331,18 @@ const App = () => {
                   React.createElement('h3', { className: "text-[10px] font-black uppercase tracking-widest text-slate-400 flex items-center gap-2" },
                     React.createElement(BarChart3, { className: "w-4 h-4" }), " Range Projection"
                   ),
-                  React.createElement('div', { className: "text-[10px] font-bold font-mono text-amber-500" }, `Δ ${ results.max - results.min } RANGE`)
+                  React.createElement('div', { className: "text-[10px] font-bold font-mono text-amber-500" }, `Δ ${results.max - results.min} RANGE`)
                 ),
 
                 React.createElement('div', { className: "relative h-16 bg-[#0c0e12] rounded-2xl border border-slate-800 shadow-inner group flex items-center px-12" },
                   React.createElement('div', { className: "w-full h-1 bg-slate-800 rounded-full relative" },
                     React.createElement('div', {
-                      className: `absolute top - 1 / 2 - translate - y - 1 / 2 h - 4 rounded - full shadow - lg ring - 2 ring - white / 10 ${ calcMode === 'healing' ? 'bg-gradient-to-r from-emerald-600 to-emerald-400' : 'bg-gradient-to-r from-rose-700 to-amber-500' } `,
+                      className: `absolute top-1/2 -translate-y-1/2 h-4 rounded-full shadow-lg ring-2 ring-white/10 ${calcMode === 'healing' ? 'bg-gradient-to-r from-emerald-600 to-emerald-400' : 'bg-gradient-to-r from-rose-700 to-amber-500'}`,
                       style: { width: '100%', left: '0' }
                     },
-                      React.createElement('div', { className: "absolute left-0 -top-10 text-[10px] font-black text-slate-400 bg-[#161a20] px-2 py-1 rounded border border-slate-800 shadow-sm whitespace-nowrap" }, `MIN ${ results.min } `),
-                      React.createElement('div', { className: "absolute right-0 -top-10 text-[10px] font-black text-slate-400 bg-[#161a20] px-2 py-1 rounded border border-slate-800 shadow-sm whitespace-nowrap" }, `MAX ${ results.max } `),
-                      React.createElement('div', { className: "absolute left-1/2 -bottom-10 -translate-x-1/2 text-[10px] font-black text-amber-500 bg-[#161a20] px-2 py-1 rounded border border-amber-500/20 whitespace-nowrap" }, `AVG ${ results.avg } `),
+                      React.createElement('div', { className: "absolute left-0 -top-10 text-[10px] font-black text-slate-400 bg-[#161a20] px-2 py-1 rounded border border-slate-800 shadow-sm whitespace-nowrap" }, `MIN ${results.min}`),
+                      React.createElement('div', { className: "absolute right-0 -top-10 text-[10px] font-black text-slate-400 bg-[#161a20] px-2 py-1 rounded border border-slate-800 shadow-sm whitespace-nowrap" }, `MAX ${results.max}`),
+                      React.createElement('div', { className: "absolute left-1/2 -bottom-10 -translate-x-1/2 text-[10px] font-black text-amber-500 bg-[#161a20] px-2 py-1 rounded border border-amber-500/20 whitespace-nowrap" }, `AVG ${results.avg}`),
                       React.createElement('div', { className: "absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-0.5 h-6 bg-white shadow-[0_0_10px_white] rounded-full" })
                     )
                   )
