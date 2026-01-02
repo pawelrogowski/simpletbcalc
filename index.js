@@ -35,12 +35,13 @@ const App = () => {
   const [level, setLevel] = useState(250);
   const [magicLevel, setMagicLevel] = useState(95);
 
-  // Spellparameters
+  // Spell parameters
   const [basePower, setBasePower] = useState(140); // From in-game Spell Archive
   const [calcMode, setCalcMode] = useState('magic');
 
   // Modifiers
   const [equipBonus, setEquipBonus] = useState(0);
+  const [targetResistance, setTargetResistance] = useState(100);
 
   /**
    * Calculates the level damage/healing bonus with diminishing returns
@@ -85,9 +86,16 @@ const App = () => {
     min = levelBase + minStatComponent;
     max = levelBase + maxStatComponent;
 
+    // Apply Equipment Bonus
     if (equipBonus !== 0) {
       min = Math.floor(min * (1 + equipBonus / 100));
       max = Math.floor(max * (1 + equipBonus / 100));
+    }
+
+    // Apply Creature Resistance/Weakness (only for attack spells)
+    if (calcMode === 'magic' && targetResistance !== 100) {
+      min = Math.floor(min * (targetResistance / 100));
+      max = Math.floor(max * (targetResistance / 100));
     }
 
     return {
@@ -104,7 +112,7 @@ const App = () => {
       scalingStat: magicLevel,
       statLabel: 'ML'
     };
-  }, [level, magicLevel, basePower, equipBonus]);
+  }, [level, magicLevel, basePower, equipBonus, targetResistance, calcMode]);
 
   const activeMode = CALC_MODES.find(m => m.id === calcMode) || CALC_MODES[0];
   const ModeIcon = activeMode.icon;
@@ -121,8 +129,7 @@ const App = () => {
               React.createElement('h1', { className: "text-2xl font-black text-white tracking-tight leading-none" }, "TibiaCalc"),
               React.createElement('p', { className: "text-xs text-slate-500 font-bold uppercase tracking-widest mt-1" }, "Base Power Formula")
             )
-          ),
-
+          )
         )
       ),
 
@@ -143,8 +150,8 @@ const App = () => {
                   key: mode.id,
                   onClick: () => setCalcMode(mode.id),
                   className: `p-4 rounded-xl border text-center transition-all ${calcMode === mode.id
-                    ? "bg-amber-500/10 border-amber-500 text-amber-500"
-                    : "bg-[#0c0e12] border-slate-800 text-slate-500 hover:border-slate-600"
+                      ? "bg-amber-500/10 border-amber-500 text-amber-500"
+                      : "bg-[#0c0e12] border-slate-800 text-slate-500 hover:border-slate-600"
                     }`
                 },
                   React.createElement(mode.icon, { className: "w-6 h-6 mx-auto mb-2" }),
@@ -170,7 +177,7 @@ const App = () => {
                   onChange: (e) => setLevel(Math.max(1, parseInt(e.target.value) || 0)),
                   className: "w-full bg-[#0c0e12] border border-slate-700 rounded-xl px-4 py-3 text-white font-bold focus:ring-2 focus:ring-amber-500 outline-none transition-all"
                 }),
-                React.createElement('div', { className: "mt-1 text-[9px] text-slate-600 font-bold uppercase italic" }, `Level Bonus: +${results.levelBase}`)
+                React.createElement('div', { className: "mt-1 text-[9px] text-slate-600 font-bold uppercase italic" }, `Damage/Healing: +${results.levelBase}`)
               ),
 
               React.createElement('div', { className: "grid grid-cols-2 gap-4" },
@@ -212,6 +219,26 @@ const App = () => {
                 className: "w-full bg-[#0c0e12] border border-amber-500/50 rounded-xl px-4 py-3 text-amber-400 font-bold text-xl focus:ring-2 focus:ring-amber-500 outline-none ring-1 ring-amber-500/30"
               }),
               React.createElement('div', { className: "mt-2 text-[9px] text-slate-500" }, "Open Cyclopedia → Spell Archive → Select spell → Combat Stats → Base Power")
+            )
+          ),
+
+          // Target Modifiers
+          calcMode === 'magic' && (
+            React.createElement('section', { className: "bg-[#161a20] border border-slate-800 rounded-2xl p-6 shadow-xl" },
+              React.createElement('div', { className: "flex items-center gap-2 mb-6" },
+                React.createElement(ShieldPlus, { className: "w-5 h-5 text-amber-500" }),
+                React.createElement('h2', { className: "text-lg font-bold text-white uppercase tracking-tight" }, "Target Modifiers")
+              ),
+              React.createElement('div', null,
+                React.createElement('label', { className: "block text-[10px] font-black text-slate-500 uppercase tracking-widest mb-2" }, "Target Resistance/Weakness (%)"),
+                React.createElement('input', {
+                  type: "number",
+                  value: targetResistance,
+                  onChange: (e) => setTargetResistance(parseInt(e.target.value) || 100),
+                  className: "w-full bg-[#0c0e12] border border-slate-700 rounded-xl px-4 py-3 text-white font-bold focus:ring-2 focus:ring-amber-500 outline-none"
+                }),
+                React.createElement('div', { className: "mt-2 text-[9px] text-slate-500" }, "100% is neutral. Above 100% = Weakness, Below 100% = Resistance")
+              )
             )
           )
         ),
