@@ -6,7 +6,6 @@ import {
   Heart,
   Swords,
   BarChart3,
-  Sword,
   Flame,
   Calculator,
   Sparkles,
@@ -18,7 +17,6 @@ import {
  * 
  * Formula derived from in-game "Base Power" values (from Spell Archive):
  * - Magic/Healing: Uses Base Power to derive multipliers
- * - Melee: Uses Weapon Attack + Skill
  * 
  * Includes high-level diminishing returns scaling for level bonus:
  * - 1-500: +1 per 5 levels
@@ -29,7 +27,6 @@ import {
 
 const CALC_MODES = [
   { id: 'magic', label: 'Magic/Holy', icon: Flame, description: 'Spells & Runes that scale with Magic Level' },
-  { id: 'melee', label: 'Melee', icon: Sword, description: 'Physical attacks that scale with Skill + Weapon' },
   { id: 'healing', label: 'Healing', icon: Heart, description: 'Healing spells that scale with Magic Level' },
 ];
 
@@ -37,11 +34,9 @@ const App = () => {
   // Character stats
   const [level, setLevel] = useState(250);
   const [magicLevel, setMagicLevel] = useState(95);
-  const [meleeSkill, setMeleeSkill] = useState(110);
 
-  // Spell/Attack parameters
+  // Spellparameters
   const [basePower, setBasePower] = useState(140); // From in-game Spell Archive
-  const [weaponAttack, setWeaponAttack] = useState(52); // Weapon attack value
   const [calcMode, setCalcMode] = useState('magic');
 
   // Modifiers
@@ -78,72 +73,38 @@ const App = () => {
 
     let min, max, minMult, maxMult, minOffset, maxOffset;
 
-    if (calcMode === 'melee') {
-      const attackFactor = weaponAttack / 20;
-      minMult = attackFactor * 0.5;
-      maxMult = attackFactor * 1.0;
-      minOffset = Math.floor(weaponAttack * 0.1);
-      maxOffset = Math.floor(weaponAttack * 0.2);
+    const sqrtBP = Math.sqrt(basePower);
+    maxMult = sqrtBP * 0.59;
+    minMult = maxMult * 0.55;
+    maxOffset = Math.floor(basePower * 0.25);
+    minOffset = Math.floor(maxOffset * 0.6);
 
-      const minStatComponent = Math.floor(meleeSkill * minMult + minOffset);
-      const maxStatComponent = Math.floor(meleeSkill * maxMult + maxOffset);
+    const minStatComponent = Math.floor(magicLevel * minMult + minOffset);
+    const maxStatComponent = Math.floor(magicLevel * maxMult + maxOffset);
 
-      min = levelBase + minStatComponent;
-      max = levelBase + maxStatComponent;
+    min = levelBase + minStatComponent;
+    max = levelBase + maxStatComponent;
 
-      if (equipBonus !== 0) {
-        min = Math.floor(min * (1 + equipBonus / 100));
-        max = Math.floor(max * (1 + equipBonus / 100));
-      }
-
-      return {
-        levelBase,
-        minStatComponent,
-        maxStatComponent,
-        min,
-        max,
-        avg: Math.floor((min + max) / 2),
-        minMult: minMult.toFixed(2),
-        maxMult: maxMult.toFixed(2),
-        minOffset,
-        maxOffset,
-        scalingStat: meleeSkill,
-        statLabel: 'Skill'
-      };
-    } else {
-      const sqrtBP = Math.sqrt(basePower);
-      maxMult = sqrtBP * 0.59;
-      minMult = maxMult * 0.55;
-      maxOffset = Math.floor(basePower * 0.25);
-      minOffset = Math.floor(maxOffset * 0.6);
-
-      const minStatComponent = Math.floor(magicLevel * minMult + minOffset);
-      const maxStatComponent = Math.floor(magicLevel * maxMult + maxOffset);
-
-      min = levelBase + minStatComponent;
-      max = levelBase + maxStatComponent;
-
-      if (equipBonus !== 0) {
-        min = Math.floor(min * (1 + equipBonus / 100));
-        max = Math.floor(max * (1 + equipBonus / 100));
-      }
-
-      return {
-        levelBase,
-        minStatComponent,
-        maxStatComponent,
-        min,
-        max,
-        avg: Math.floor((min + max) / 2),
-        minMult: minMult.toFixed(3),
-        maxMult: maxMult.toFixed(3),
-        minOffset,
-        maxOffset,
-        scalingStat: magicLevel,
-        statLabel: 'ML'
-      };
+    if (equipBonus !== 0) {
+      min = Math.floor(min * (1 + equipBonus / 100));
+      max = Math.floor(max * (1 + equipBonus / 100));
     }
-  }, [level, magicLevel, meleeSkill, basePower, weaponAttack, calcMode, equipBonus]);
+
+    return {
+      levelBase,
+      minStatComponent,
+      maxStatComponent,
+      min,
+      max,
+      avg: Math.floor((min + max) / 2),
+      minMult: minMult.toFixed(3),
+      maxMult: maxMult.toFixed(3),
+      minOffset,
+      maxOffset,
+      scalingStat: magicLevel,
+      statLabel: 'ML'
+    };
+  }, [level, magicLevel, basePower, equipBonus]);
 
   const activeMode = CALC_MODES.find(m => m.id === calcMode) || CALC_MODES[0];
   const ModeIcon = activeMode.icon;
@@ -181,18 +142,18 @@ const App = () => {
               React.createElement(Swords, { className: "w-5 h-5 text-amber-500" }),
               React.createElement('h2', { className: "text-lg font-bold text-white uppercase tracking-tight" }, "Calculation Type")
             ),
-            React.createElement('div', { className: "grid grid-cols-3 gap-2" },
+            React.createElement('div', { className: "grid grid-cols-2 gap-4" },
               ...CALC_MODES.map(mode =>
                 React.createElement('button', {
                   key: mode.id,
                   onClick: () => setCalcMode(mode.id),
-                  className: `p-3 rounded-xl border text-center transition-all ${calcMode === mode.id
+                  className: `p-4 rounded-xl border text-center transition-all ${calcMode === mode.id
                       ? "bg-amber-500/10 border-amber-500 text-amber-500"
                       : "bg-[#0c0e12] border-slate-800 text-slate-500 hover:border-slate-600"
                     }`
                 },
-                  React.createElement(mode.icon, { className: "w-5 h-5 mx-auto mb-1" }),
-                  React.createElement('div', { className: "text-[10px] font-bold uppercase" }, mode.label)
+                  React.createElement(mode.icon, { className: "w-6 h-6 mx-auto mb-2" }),
+                  React.createElement('div', { className: "text-[11px] font-bold uppercase tracking-tight" }, mode.label)
                 )
               )
             )
@@ -205,37 +166,26 @@ const App = () => {
               React.createElement('h2', { className: "text-lg font-bold text-white uppercase tracking-tight" }, "Character Stats")
             ),
 
-            React.createElement('div', { className: "space-y-4" },
+            React.createElement('div', { className: "space-y-6" },
+              React.createElement('div', null,
+                React.createElement('label', { className: "block text-[10px] font-black text-slate-500 uppercase tracking-widest mb-2" }, "Level"),
+                React.createElement('input', {
+                  type: "number",
+                  value: level,
+                  onChange: (e) => setLevel(Math.max(1, parseInt(e.target.value) || 0)),
+                  className: "w-full bg-[#0c0e12] border border-slate-700 rounded-xl px-4 py-3 text-white font-bold focus:ring-2 focus:ring-amber-500 outline-none transition-all"
+                }),
+                React.createElement('div', { className: "mt-1 text-[9px] text-slate-600 font-bold uppercase italic" }, `Level Bonus: +${results.levelBase}`)
+              ),
+
               React.createElement('div', { className: "grid grid-cols-2 gap-4" },
-                React.createElement('div', null,
-                  React.createElement('label', { className: "block text-[10px] font-black text-slate-500 uppercase tracking-widest mb-2" }, "Level"),
-                  React.createElement('input', {
-                    type: "number",
-                    value: level,
-                    onChange: (e) => setLevel(Math.max(1, parseInt(e.target.value) || 0)),
-                    className: "w-full bg-[#0c0e12] border border-slate-700 rounded-xl px-4 py-3 text-white font-bold focus:ring-2 focus:ring-amber-500 outline-none transition-all"
-                  }),
-                  React.createElement('div', { className: "mt-1 text-[9px] text-slate-600 font-bold uppercase italic" }, `Level Bonus: +${results.levelBase}`)
-                ),
                 React.createElement('div', null,
                   React.createElement('label', { className: "block text-[10px] font-black text-slate-500 uppercase tracking-widest mb-2" }, "Magic Level"),
                   React.createElement('input', {
                     type: "number",
                     value: magicLevel,
                     onChange: (e) => setMagicLevel(Math.max(0, parseInt(e.target.value) || 0)),
-                    className: `w-full bg-[#0c0e12] border border-slate-700 rounded-xl px-4 py-3 text-white font-bold focus:ring-2 focus:ring-amber-500 outline-none transition-all ${calcMode !== 'melee' ? 'ring-1 ring-amber-500/50' : 'opacity-40'}`
-                  })
-                )
-              ),
-
-              React.createElement('div', { className: "grid grid-cols-2 gap-4" },
-                React.createElement('div', null,
-                  React.createElement('label', { className: "block text-[10px] font-black text-slate-500 uppercase tracking-widest mb-2" }, "Melee Skill"),
-                  React.createElement('input', {
-                    type: "number",
-                    value: meleeSkill,
-                    onChange: (e) => setMeleeSkill(Math.max(0, parseInt(e.target.value) || 0)),
-                    className: `w-full bg-[#0c0e12] border border-slate-700 rounded-xl px-4 py-3 text-white font-bold focus:ring-2 focus:ring-amber-500 outline-none transition-all ${calcMode === 'melee' ? 'ring-1 ring-amber-500/50' : 'opacity-40'}`
+                    className: "w-full bg-[#0c0e12] border border-slate-700 rounded-xl px-4 py-3 text-white font-bold focus:ring-2 focus:ring-amber-500 outline-none transition-all ring-1 ring-amber-500/50"
                   })
                 ),
                 React.createElement('div', null,
@@ -251,37 +201,22 @@ const App = () => {
             )
           ),
 
-          // Spell/Weapon Parameters
+          // Spell Parameters
           React.createElement('section', { className: "bg-[#161a20] border border-slate-800 rounded-2xl p-6 shadow-xl" },
             React.createElement('div', { className: "flex items-center gap-2 mb-6" },
               React.createElement(Zap, { className: "w-5 h-5 text-amber-500" }),
-              React.createElement('h2', { className: "text-lg font-bold text-white uppercase tracking-tight" },
-                calcMode === 'melee' ? "Weapon Stats" : "Spell Stats"
-              )
+              React.createElement('h2', { className: "text-lg font-bold text-white uppercase tracking-tight" }, "Spell Stats")
             ),
 
-            calcMode === 'melee' ? (
-              React.createElement('div', null,
-                React.createElement('label', { className: "block text-[10px] font-black text-slate-500 uppercase tracking-widest mb-2" }, "Weapon Attack"),
-                React.createElement('input', {
-                  type: "number",
-                  value: weaponAttack,
-                  onChange: (e) => setWeaponAttack(Math.max(0, parseInt(e.target.value) || 0)),
-                  className: "w-full bg-[#0c0e12] border border-slate-700 rounded-xl px-4 py-3 text-white font-bold focus:ring-2 focus:ring-amber-500 outline-none ring-1 ring-amber-500/50"
-                }),
-                React.createElement('div', { className: "mt-2 text-[9px] text-slate-500" }, "Found on your weapon's tooltip")
-              )
-            ) : (
-              React.createElement('div', null,
-                React.createElement('label', { className: "block text-[10px] font-black text-amber-500 uppercase tracking-widest mb-2" }, "⚡ Base Power (from Cyclopedia)"),
-                React.createElement('input', {
-                  type: "number",
-                  value: basePower,
-                  onChange: (e) => setBasePower(Math.max(1, parseInt(e.target.value) || 0)),
-                  className: "w-full bg-[#0c0e12] border border-amber-500/50 rounded-xl px-4 py-3 text-amber-400 font-bold text-xl focus:ring-2 focus:ring-amber-500 outline-none ring-1 ring-amber-500/30"
-                }),
-                React.createElement('div', { className: "mt-2 text-[9px] text-slate-500" }, "Open Cyclopedia → Spell Archive → Select spell → Combat Stats → Base Power")
-              )
+            React.createElement('div', null,
+              React.createElement('label', { className: "block text-[10px] font-black text-amber-500 uppercase tracking-widest mb-2" }, "⚡ Base Power (from Cyclopedia)"),
+              React.createElement('input', {
+                type: "number",
+                value: basePower,
+                onChange: (e) => setBasePower(Math.max(1, parseInt(e.target.value) || 0)),
+                className: "w-full bg-[#0c0e12] border border-amber-500/50 rounded-xl px-4 py-3 text-amber-400 font-bold text-xl focus:ring-2 focus:ring-amber-500 outline-none ring-1 ring-amber-500/30"
+              }),
+              React.createElement('div', { className: "mt-2 text-[9px] text-slate-500" }, "Open Cyclopedia → Spell Archive → Select spell → Combat Stats → Base Power")
             )
           )
         ),
@@ -290,19 +225,17 @@ const App = () => {
         React.createElement('section', { className: "lg:col-span-7 space-y-6" },
           React.createElement('div', { className: "bg-[#161a20] border border-slate-800 rounded-3xl overflow-hidden shadow-2xl flex flex-col h-full ring-1 ring-white/5" },
             React.createElement('div', { className: "p-10 border-b border-slate-800 bg-gradient-to-br from-[#1c2129] to-[#161a20] relative" },
-              React.createElement('div', { className: `absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent ${calcMode === 'healing' ? 'via-emerald-500' : calcMode === 'melee' ? 'via-slate-400' : 'via-amber-500'} to-transparent` }),
+              React.createElement('div', { className: `absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent ${calcMode === 'healing' ? 'via-emerald-500' : 'via-amber-500'} to-transparent` }),
 
               React.createElement('div', { className: "flex items-center justify-between mb-10" },
                 React.createElement('div', { className: "flex items-center gap-4" },
-                  React.createElement('div', { className: `p-3 rounded-2xl ${calcMode === 'healing' ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20' : calcMode === 'melee' ? 'bg-slate-500/10 text-slate-400 border border-slate-500/20' : 'bg-rose-500/10 text-rose-500 border border-rose-500/20'}` },
+                  React.createElement('div', { className: `p-3 rounded-2xl ${calcMode === 'healing' ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20' : 'bg-rose-500/10 text-rose-500 border border-rose-500/20'}` },
                     React.createElement(ModeIcon, { className: "w-8 h-8" })
                   ),
                   React.createElement('div', null,
-                    React.createElement('h2', { className: "text-2xl font-black text-white tracking-tight leading-none uppercase" },
-                      calcMode === 'melee' ? `Weapon Atk ${weaponAttack}` : `Base Power ${basePower}`
-                    ),
+                    React.createElement('h2', { className: "text-2xl font-black text-white tracking-tight leading-none uppercase" }, `Base Power ${basePower}`),
                     React.createElement('p', { className: "text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] mt-2" },
-                      `Level ${level} • ${results.statLabel} ${results.scalingStat}`
+                      `Level ${level} • ML ${results.scalingStat}`
                     )
                   )
                 ),
