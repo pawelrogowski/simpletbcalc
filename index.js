@@ -26,8 +26,8 @@ import {
  */
 
 const CALC_MODES = [
-  { id: 'magic', label: 'Magic/Holy', icon: Flame, description: 'Spells & Runes that scale with Magic Level' },
-  { id: 'healing', label: 'Healing', icon: Heart, description: 'Healing spells that scale with Magic Level' },
+  { id: 'magic', label: 'Attack Spells', icon: Flame, description: 'Spells & Runes that scale with Magic Level' },
+  { id: 'healing', label: 'Healing Spells', icon: Heart, description: 'Healing spells that scale with Magic Level' },
 ];
 
 const App = () => {
@@ -122,12 +122,7 @@ const App = () => {
               React.createElement('p', { className: "text-xs text-slate-500 font-bold uppercase tracking-widest mt-1" }, "Base Power Formula")
             )
           ),
-          React.createElement('div', { className: "hidden md:flex items-center gap-4" },
-            React.createElement('div', { className: "flex items-center gap-2 text-[10px] font-bold text-amber-500/70 bg-amber-500/5 px-3 py-1.5 rounded-lg border border-amber-500/20" },
-              React.createElement(Sparkles, { className: "w-3 h-3" }),
-              React.createElement('span', null, "Get Base Power from Cyclopedia → Spell Archive")
-            )
-          )
+
         )
       ),
 
@@ -148,8 +143,8 @@ const App = () => {
                   key: mode.id,
                   onClick: () => setCalcMode(mode.id),
                   className: `p-4 rounded-xl border text-center transition-all ${calcMode === mode.id
-                      ? "bg-amber-500/10 border-amber-500 text-amber-500"
-                      : "bg-[#0c0e12] border-slate-800 text-slate-500 hover:border-slate-600"
+                    ? "bg-amber-500/10 border-amber-500 text-amber-500"
+                    : "bg-[#0c0e12] border-slate-800 text-slate-500 hover:border-slate-600"
                     }`
                 },
                   React.createElement(mode.icon, { className: "w-6 h-6 mx-auto mb-2" }),
